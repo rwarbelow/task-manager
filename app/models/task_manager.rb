@@ -15,8 +15,8 @@ class TaskManager
   end
 
   def self.raw_tasks
-    database.transaction do
-      database['tasks'] || []
+    database.transaction do |db|
+      db['tasks'] || []
     end
   end
 
@@ -29,16 +29,16 @@ class TaskManager
   end
 
   def self.update(id, task)
-    database.transaction do 
-      target = database['tasks'].find { |data| data["id"] == id }
+    database.transaction do |db|
+      target = db['tasks'].find { |data| data["id"] == id }
       target["title"] = task[:title]
       target["description"] = task[:description]
     end
   end
 
   def self.delete(id)
-    database.transaction do
-      database['tasks'].delete_if { |task| task["id"] == id }
+    database.transaction do |db|
+      db['tasks'].delete_if { |task| task["id"] == id }
     end
   end
 
