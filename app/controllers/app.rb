@@ -3,6 +3,8 @@ require 'models/task_manager'
 
 class TaskManagerApp < Sinatra::Base
   set :method_override, true
+  set :root, File.join(File.dirname(__FILE__), '..')
+  set :views, Proc.new { File.join(root, "views") } 
 
   get '/' do
     erb :dashboard
