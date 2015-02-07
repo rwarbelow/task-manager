@@ -43,7 +43,7 @@ class TaskManager
   end
 
   def self.database
-    if ENV["TRAFFIC_SPY_ENV"] == "test"
+    if ENV["TASK_MANAGER_ENV"] == "test"
       @db ||= YAML::Store.new("db/task_manager_test")
     else
       @db ||= YAML::Store.new("db/task_manager_dev")

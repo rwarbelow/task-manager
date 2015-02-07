@@ -1,5 +1,4 @@
-require 'models/task'
-require 'models/task_manager'
+require 'models/base'
 
 class TaskManagerApp < Sinatra::Base
   set :method_override, true
