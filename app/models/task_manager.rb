@@ -2,51 +2,40 @@ require 'yaml/store'
 
 class TaskManager
   def self.create(task)
-    database.transaction do
-      database['tasks'] ||= []
-      database['total'] ||= 0
-      database['total'] += 1
-      database['tasks'] << { "id" => database['total'], "title" => task[:title], "description" => task[:description] }
-    end
+    table.insert(:title => task[:title], :description => task[:description])
   end
 
   def self.all
-    raw_tasks.map { |data| Task.new(data) }
+    table.map { |row| Task.new(row) }
   end
 
-  def self.raw_tasks
-    database.transaction do |db|
-      db['tasks'] || []
-    end
-  end
-
-  def self.raw_task(id)
-    raw_tasks.find { |task| task["id"] == id }
+  def self.table
+    database.from(:tasks).order(:id)
   end
 
   def self.find(id)
-    Task.new(raw_task(id))
+    raw_task(id).map { |data| Task.new(data) }.first
   end
 
   def self.update(id, task)
-    database.transaction do |db|
-      target = db['tasks'].find { |data| data["id"] == id }
-      target["title"] = task[:title]
-      target["description"] = task[:description]
-    end
+    raw_task(id).update(:title => task[:title], :description => task[:description])
   end
 
   def self.delete(id)
-    database.transaction do |db|
-      db['tasks'].delete_if { |task| task["id"] == id }
-    end
+    raw_task(id).delete
+  end
+
+  def self.raw_task(id)
+    table.where(:id => id)
   end
 
   def self.database
     if ENV["TRAFFIC_SPY_ENV"] == "test"
-      @db ||= YAML::Store.new("db/task_manager_test")
+      @database = Sequel.postgres('task-manager-test')
+      # @db ||= YAML::Store.new("db/task_manager_test")
     else
-      @db ||= YAML::Store.new("db/task_manager_dev")
+      @database = Sequel.postgres('task-manager')
+      # @db ||= YAML::Store.new("db/task_manager_dev")
     end
     # @database ||= YAML::Store.new("db/task_manager")
   end
